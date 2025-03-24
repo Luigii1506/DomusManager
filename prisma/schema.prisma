@@ -16,187 +16,132 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
-  password      String
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
   role          UserRole  @default(USER)
+  properties    Property[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  properties    Property[] @relation("PropertyOwner")
-  rentals       Rental[]  @relation("Tenant")
-  maintenanceRequests MaintenanceRequest[] @relation("RequestedBy")
-  messages      Message[] @relation("MessageSender")
 }
 
 enum UserRole {
-  ADMIN
-  OWNER
-  TENANT
   USER
+  ADMIN
 }
 
 model Property {
-  id            String    @id @default(cuid())
-  title         String
-  description   String
-  type          PropertyType
-  status        PropertyStatus @default(AVAILABLE)
-  price         Float
-  address       String
-  city          String
-  state         String
-  zipCode       String
-  features      Json?
-  images        PropertyImage[]
-  documents     Document[]
-  ownerId       String
-  owner         User      @relation("PropertyOwner", fields: [ownerId], references: [id])
-  rentals       Rental[]
-  maintenanceHistory MaintenanceRequest[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String
+  type        PropertyType
+  status      PropertyStatus
+  price       Decimal
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  size        Int
+  bedrooms    Int
+  bathrooms   Int
+  yearBuilt   Int
+  features    Features?
+  images      Image[]
+  documents   Document[]
+  maintenanceRecords MaintenanceRecord[]
+  user        User     @relation(fields: [ownerId], references: [id])
+  ownerId     String
+}
+
+model Features {
+  id        String    @id @default(cuid())
+  property  Property  @relation(fields: [propertyId], references: [id])
+  propertyId String   @unique
+  amenities Amenity[]
+  parking   Parking[]
+  security  Security[]
+}
+
+model Amenity {
+  id        String    @id @default(cuid())
+  name      String
+  features  Features  @relation(fields: [featuresId], references: [id])
+  featuresId String
+}
+
+model Parking {
+  id        String    @id @default(cuid())
+  type      String
+  features  Features  @relation(fields: [featuresId], references: [id])
+  featuresId String
+}
+
+model Security {
+  id        String    @id @default(cuid())
+  type      String
+  features  Features  @relation(fields: [featuresId], references: [id])
+  featuresId String
+}
+
+model Image {
+  id        String    @id @default(cuid())
+  url       String
+  property  Property  @relation(fields: [propertyId], references: [id])
+  propertyId String
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  name        String
+  url         String
+  type        String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  uploadedAt  DateTime  @default(now())
+}
+
+model MaintenanceRecord {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  status      MaintenanceStatus
+  priority    MaintenancePriority
+  cost        Decimal?
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum PropertyType {
   HOUSE
   APARTMENT
-  COMMERCIAL
+  CONDO
+  TOWNHOUSE
   LAND
-  OFFICE
+  COMMERCIAL
 }
 
 enum PropertyStatus {
   AVAILABLE
   RENTED
-  UNDER_MAINTENANCE
   SOLD
-}
-
-model PropertyImage {
-  id          String    @id @default(cuid())
-  url         String
-  propertyId  String
-  property    Property  @relation(fields: [propertyId], references: [id])
-  type        ImageType @default(PHOTO)
-  createdAt   DateTime  @default(now())
-}
-
-enum ImageType {
-  PHOTO
-  FLOOR_PLAN
-  VIDEO_THUMBNAIL
-}
-
-model Rental {
-  id            String    @id @default(cuid())
-  propertyId    String
-  property      Property  @relation(fields: [propertyId], references: [id])
-  tenantId      String
-  tenant        User      @relation("Tenant", fields: [tenantId], references: [id])
-  startDate     DateTime
-  endDate       DateTime
-  monthlyRent   Float
-  deposit       Float
-  status        RentalStatus @default(ACTIVE)
-  payments      Payment[]
-  documents     Document[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-enum RentalStatus {
-  ACTIVE
-  EXPIRED
-  TERMINATED
-  PENDING
-}
-
-model Payment {
-  id            String    @id @default(cuid())
-  rentalId      String
-  rental        Rental    @relation(fields: [rentalId], references: [id])
-  amount        Float
-  type          PaymentType
-  status        PaymentStatus @default(PENDING)
-  dueDate       DateTime
-  paidDate      DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-enum PaymentType {
-  RENT
-  DEPOSIT
   MAINTENANCE
-  OTHER
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  OVERDUE
-  CANCELLED
-}
-
-model MaintenanceRequest {
-  id            String    @id @default(cuid())
-  propertyId    String
-  property      Property  @relation(fields: [propertyId], references: [id])
-  requestedById String
-  requestedBy   User      @relation("RequestedBy", fields: [requestedById], references: [id])
-  title         String
-  description   String
-  priority      Priority  @default(MEDIUM)
-  status        MaintenanceStatus @default(PENDING)
-  assignedTo    String?
-  cost          Float?
-  scheduledDate DateTime?
-  completedDate DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
 }
 
 enum MaintenanceStatus {
   PENDING
-  APPROVED
   IN_PROGRESS
   COMPLETED
   CANCELLED
 }
 
-model Document {
-  id            String    @id @default(cuid())
-  title         String
-  url           String
-  type          DocumentType
-  propertyId    String?
-  property      Property? @relation(fields: [propertyId], references: [id])
-  rentalId      String?
-  rental        Rental?   @relation(fields: [rentalId], references: [id])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-enum DocumentType {
-  CONTRACT
-  INVOICE
-  RECEIPT
-  MAINTENANCE_REPORT
-  OTHER
-}
-
-model Message {
-  id            String    @id @default(cuid())
-  senderId      String
-  sender        User      @relation("MessageSender", fields: [senderId], references: [id])
-  content       String
-  read          Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }

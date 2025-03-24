@@ -10,63 +10,95 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils/format";
 
-interface MaintenanceRecord {
-  id: number;
+export interface MaintenanceRecord {
+  id: string;
   title: string;
-  status: string;
-  date: string;
-  cost: number;
+  description: string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  cost: number | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-interface PropertyMaintenanceProps {
-  maintenanceHistory: MaintenanceRecord[];
+export interface PropertyMaintenanceProps {
+  propertyId: string;
+  maintenanceRecords: MaintenanceRecord[];
 }
+
+const priorityColors = {
+  LOW: "bg-green-100 text-green-800",
+  MEDIUM: "bg-yellow-100 text-yellow-800",
+  HIGH: "bg-orange-100 text-orange-800",
+  URGENT: "bg-red-100 text-red-800",
+};
+
+const statusColors = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  IN_PROGRESS: "bg-blue-100 text-blue-800",
+  COMPLETED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-gray-100 text-gray-800",
+};
 
 export function PropertyMaintenance({
-  maintenanceHistory,
+  propertyId,
+  maintenanceRecords,
 }: PropertyMaintenanceProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Maintenance Records</h3>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Request
-        </Button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {maintenanceHistory.map((record) => (
-          <Card key={record.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {record.title}
-              </CardTitle>
-              <Wrench className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Date: {new Date(record.date).toLocaleDateString()}
-                <br />
-                Cost: ${record.cost}
-              </CardDescription>
-              <div className="mt-2 flex items-center justify-between">
-                <Badge
-                  variant={
-                    record.status === "completed" ? "default" : "secondary"
-                  }
-                >
-                  {record.status}
-                </Badge>
-                <Button variant="outline" size="sm">
-                  View Details
-                </Button>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Maintenance Records</CardTitle>
+        <Button>Add Record</Button>
+      </CardHeader>
+      <CardContent>
+        {maintenanceRecords.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No maintenance records found.
+          </p>
+        ) : (
+          <div className="grid gap-4">
+            {maintenanceRecords.map((record) => (
+              <div
+                key={record.id}
+                className="flex flex-col space-y-2 rounded-lg border p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">{record.title}</h3>
+                  <div className="flex items-center space-x-2">
+                    <Badge
+                      variant="secondary"
+                      className={priorityColors[record.priority]}
+                    >
+                      {record.priority}
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className={statusColors[record.status]}
+                    >
+                      {record.status}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {record.description}
+                </p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {new Date(record.createdAt).toLocaleDateString()}
+                  </span>
+                  {record.cost && (
+                    <span className="font-medium">
+                      Cost: {formatCurrency(record.cost)}
+                    </span>
+                  )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

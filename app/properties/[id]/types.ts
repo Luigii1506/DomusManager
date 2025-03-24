@@ -1,17 +1,27 @@
 export interface Property {
-  id: number;
+  id: string;
   title: string;
+  description: string;
   type: string;
-  location: string;
+  status: string;
   price: number;
+  size: number;
   bedrooms: number;
   bathrooms: number;
-  size: number;
-  yearBuilt: number;
-  description: string;
-  amenities: string[];
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
   images: string[];
-  status: string;
+  features: {
+    amenities: string[];
+    parking: string[];
+    security: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  yearBuilt: number;
   documents: Array<{
     name: string;
     date: string;

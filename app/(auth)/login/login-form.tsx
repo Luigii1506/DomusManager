@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -29,7 +29,9 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,25 +42,35 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isLoading) return;
+
     setIsLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: values.email.toLowerCase().trim(),
+        password: values.password,
+        redirect: false,
+      });
 
-    const signInResult = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
+      if (result?.error) {
+        toast({
+          title: "Error",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    setIsLoading(false);
-
-    if (!signInResult?.error) {
+      router.push(callbackUrl);
       router.refresh();
-      router.push("/dashboard");
-    } else {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -72,7 +84,12 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                  disabled={isLoading}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,6 +105,8 @@ export function LoginForm() {
                 <Input
                   type="password"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
+                  disabled={isLoading}
                   {...field}
                 />
               </FormControl>

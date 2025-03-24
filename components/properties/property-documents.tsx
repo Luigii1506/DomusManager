@@ -1,61 +1,68 @@
 "use client";
 
-import { FileText, Upload } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { FileIcon } from "lucide-react";
 
-interface Document {
-  id: number;
+export interface Document {
+  id: string;
   name: string;
+  url: string;
   type: string;
-  uploadedAt: string;
+  uploadedAt: Date;
 }
 
-interface PropertyDocumentsProps {
+export interface PropertyDocumentsProps {
+  propertyId: string;
   documents: Document[];
 }
 
-export function PropertyDocuments({ documents }: PropertyDocumentsProps) {
+export function PropertyDocuments({
+  propertyId,
+  documents,
+}: PropertyDocumentsProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Property Documents</h3>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Document
-        </Button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {documents.map((document) => (
-          <Card key={document.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {document.name}
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                Type: {document.type}
-                <br />
-                Uploaded: {new Date(document.uploadedAt).toLocaleDateString()}
-              </CardDescription>
-              <div className="mt-2">
-                <Button variant="outline" size="sm">
-                  Download
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Documents</CardTitle>
+        <Button>Upload Document</Button>
+      </CardHeader>
+      <CardContent>
+        {documents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No documents uploaded yet.
+          </p>
+        ) : (
+          <div className="grid gap-4">
+            {documents.map((document) => (
+              <div
+                key={document.id}
+                className="flex items-center justify-between rounded-lg border p-4"
+              >
+                <div className="flex items-center space-x-4">
+                  <FileIcon className="h-6 w-6 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">{document.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {document.type} •{" "}
+                      {new Date(document.uploadedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <Button variant="ghost" asChild>
+                  <a
+                    href={document.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View
+                  </a>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

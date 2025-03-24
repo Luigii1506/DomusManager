@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,49 +13,62 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Bath, BedDouble, Building2, DollarSign, MapPin } from "lucide-react";
+import { PropertyType, PropertyStatus } from "@prisma/client";
+import { toast } from "@/components/ui/use-toast";
 
-// Mock properties data - replace with actual data from your API
-const properties = [
-  {
-    id: 1,
-    title: "Modern Downtown Apartment",
-    type: "apartment",
-    location: "123 Main St, Downtown",
-    price: 2500,
-    bedrooms: 2,
-    bathrooms: 2,
-    image:
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400",
-    status: "available",
-  },
-  {
-    id: 2,
-    title: "Luxury Beach House",
-    type: "house",
-    location: "456 Ocean Ave, Beachfront",
-    price: 5000,
-    bedrooms: 4,
-    bathrooms: 3,
-    image:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400",
-    status: "rented",
-  },
-  // Add more properties as needed
-];
+interface Property {
+  id: string;
+  title: string;
+  type: PropertyType;
+  status: PropertyStatus;
+  price: number;
+  address: string;
+  city: string;
+  state: string;
+  bedrooms: number;
+  bathrooms: number;
+  features: {
+    amenities: string[];
+    parking: string[];
+    security: string[];
+  };
+  images: Array<{ url: string }>;
+}
 
 export function PropertyList() {
   const router = useRouter();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [propertyType, setPropertyType] = useState("all");
 
-  const filteredProperties = properties.filter((property) => {
-    const matchesSearch = property.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesType =
-      propertyType === "all" || property.type === propertyType;
-    return matchesSearch && matchesType;
-  });
+  useEffect(() => {
+    fetchProperties();
+  }, [searchTerm, propertyType]);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("search", searchTerm);
+      if (propertyType !== "all") params.append("type", propertyType);
+
+      const response = await fetch(`/api/properties?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch properties");
+
+      const { data } = await response.json();
+      setProperties(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load properties. Please try again later.",
+        variant: "destructive",
+      });
+      console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -72,66 +85,70 @@ export function PropertyList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="apartment">Apartment</SelectItem>
-            <SelectItem value="house">House</SelectItem>
-            <SelectItem value="commercial">Commercial</SelectItem>
+            <SelectItem value="APARTMENT">Apartment</SelectItem>
+            <SelectItem value="HOUSE">House</SelectItem>
+            <SelectItem value="COMMERCIAL">Commercial</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProperties.map((property) => (
-          <Card key={property.id} className="overflow-hidden">
-            <img
-              src={property.image}
-              alt={property.title}
-              className="h-48 w-full object-cover"
-            />
-            <CardHeader>
-              <CardTitle className="flex items-start justify-between">
-                <span>{property.title}</span>
-                <span
-                  className={`rounded px-2 py-1 text-sm ${
-                    property.status === "available"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
+      {loading ? (
+        <div className="text-center py-8">Loading properties...</div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {properties.map((property) => (
+            <Card key={property.id} className="overflow-hidden">
+              <img
+                src={property.images[0]?.url || "/placeholder-property.jpg"}
+                alt={property.title}
+                className="h-48 w-full object-cover"
+              />
+              <CardHeader>
+                <CardTitle className="flex items-start justify-between">
+                  <span>{property.title}</span>
+                  <span
+                    className={`rounded px-2 py-1 text-sm ${
+                      property.status === "AVAILABLE"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-blue-100 text-blue-800"
+                    }`}
+                  >
+                    {property.status.charAt(0).toUpperCase() +
+                      property.status.slice(1).toLowerCase()}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    {property.address}, {property.city}, {property.state}
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <DollarSign className="h-4 w-4" />${property.price}/month
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1">
+                      <BedDouble className="h-4 w-4" />
+                      {property.bedrooms} beds
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Bath className="h-4 w-4" />
+                      {property.bathrooms} baths
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => router.push(`/properties/${property.id}`)}
                 >
-                  {property.status.charAt(0).toUpperCase() +
-                    property.status.slice(1)}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  {property.location}
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />${property.price}/month
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-1">
-                    <BedDouble className="h-4 w-4" />
-                    {property.bedrooms} beds
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" />
-                    {property.bathrooms} baths
-                  </div>
-                </div>
-              </div>
-              <Button
-                className="mt-4 w-full"
-                onClick={() => router.push(`/properties/${property.id}`)}
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
