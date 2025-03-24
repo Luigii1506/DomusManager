@@ -55,8 +55,6 @@ model Property {
   user        User     @relation(fields: [ownerId], references: [id])
   ownerId     String
 
-  Tenant Tenant[]
-
   TenantProperty TenantProperty[]
 }
 
@@ -170,8 +168,6 @@ model Tenant {
   updatedAt            DateTime  @updatedAt
 
   TenantProperty TenantProperty[]
-
-  Property Property[]
 }
 
 model TenantProperty {
