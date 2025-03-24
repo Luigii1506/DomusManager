@@ -25,6 +25,12 @@ export default async function PropertyDetailsPage({
     notFound();
   }
 
+  // Suponiendo que tienes un tipo de datos para los registros de mantenimiento
+  const maintenanceRecords = property.maintenanceRecords.map((record) => ({
+    ...record,
+    cost: record.cost ? Number(record.cost) : null, // Convertir Decimal a number
+  }));
+
   return (
     <div className="container mx-auto py-10">
       <div className="grid gap-6">
@@ -52,7 +58,7 @@ export default async function PropertyDetailsPage({
                     Price
                   </dt>
                   <dd className="text-lg font-semibold">
-                    {formatCurrency(property.price)}
+                    {formatCurrency(Number(property.price))}
                   </dd>
                 </div>
                 <div>
@@ -201,7 +207,7 @@ export default async function PropertyDetailsPage({
           <TabsContent value="maintenance">
             <PropertyMaintenance
               propertyId={property.id}
-              maintenanceRecords={property.maintenanceRecords}
+              maintenanceRecords={maintenanceRecords}
             />
           </TabsContent>
         </Tabs>

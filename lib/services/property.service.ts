@@ -155,7 +155,11 @@ export const propertyService = {
         prisma.property.create({
           data: {
             ...data,
-            userId,
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
             features: data.features
               ? {
                   create: {

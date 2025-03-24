@@ -1,24 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, MapPin, DollarSign, BedDouble, Bath, Calendar, FileText, Wrench, Users } from 'lucide-react';
-import { Property } from './types';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  BedDouble,
+  Bath,
+  Calendar,
+  FileText,
+  Wrench,
+  Users,
+} from "lucide-react";
+import { Property } from "./types";
 
-export default function PropertyDetails({ propertyData }: { propertyData: Property }) {
+export default function PropertyDetails({
+  propertyData,
+}: {
+  propertyData: Property;
+}) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Button
-        variant="outline"
-        className="mb-6"
-        onClick={() => router.back()}
-      >
+      <Button variant="outline" className="mb-6" onClick={() => router.back()}>
         Back to Properties
       </Button>
 
@@ -34,10 +44,15 @@ export default function PropertyDetails({ propertyData }: { propertyData: Proper
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">${propertyData.price}/month</p>
-            <span className={`inline-block px-3 py-1 rounded-full text-sm ${
-              propertyData.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-            }`}>
-              {propertyData.status.charAt(0).toUpperCase() + propertyData.status.slice(1)}
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm ${
+                propertyData.status === "available"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {propertyData.status.charAt(0).toUpperCase() +
+                propertyData.status.slice(1)}
             </span>
           </div>
         </div>
@@ -58,7 +73,7 @@ export default function PropertyDetails({ propertyData }: { propertyData: Proper
                   key={index}
                   onClick={() => setActiveImage(index)}
                   className={`w-20 h-20 rounded-lg overflow-hidden ${
-                    activeImage === index ? 'ring-2 ring-primary' : ''
+                    activeImage === index ? "ring-2 ring-primary" : ""
                   }`}
                 >
                   <img
@@ -112,7 +127,9 @@ export default function PropertyDetails({ propertyData }: { propertyData: Proper
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Description</h3>
-                      <p className="text-muted-foreground">{propertyData.description}</p>
+                      <p className="text-muted-foreground">
+                        {propertyData.description}
+                      </p>
                     </div>
                   </div>
                   <div>
@@ -139,15 +156,22 @@ export default function PropertyDetails({ propertyData }: { propertyData: Proper
               <CardContent>
                 <div className="space-y-4">
                   {propertyData.documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-blue-500" />
                         <div>
                           <p className="font-medium">{doc.name}</p>
-                          <p className="text-sm text-muted-foreground">Added: {doc.date}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Added: {doc.date}
+                          </p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">Download</Button>
+                      <Button variant="outline" size="sm">
+                        Download
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -163,19 +187,31 @@ export default function PropertyDetails({ propertyData }: { propertyData: Proper
               <CardContent>
                 <div className="space-y-4">
                   {propertyData.maintenance.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Wrench className="h-5 w-5 text-blue-500" />
                         <div>
                           <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
-                          <p className="text-sm text-muted-foreground">Date: {item.date}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {item.description}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Date: {item.date}
+                          </p>
                         </div>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        item.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          item.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {item.status.charAt(0).toUpperCase() +
+                          item.status.slice(1)}
                       </span>
                     </div>
                   ))}
