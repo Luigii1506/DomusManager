@@ -1,26 +1,13 @@
-"use client";
+// app/properties/[id]/page.tsx
 
-import { useParams, notFound } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { notFound } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PropertyDetails from "./PropertyDetails";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils/format";
+import { propertyService } from "@/lib/services/property.service";
 import { PropertyDocuments } from "@/components/properties/property-documents";
 import { PropertyMaintenance } from "@/components/properties/property-maintenance";
-import { PropertyTenants } from "@/components/properties/property-tenants";
-import { toast } from "@/components/ui/use-toast";
-import { Property } from "./types";
-import { Badge } from "@/components/ui/badge";
-import { propertyService } from "@/lib/services/property.service";
-import { formatCurrency } from "@/lib/utils/format";
 
 interface PropertyDetailsPageProps {
   params: {
@@ -31,6 +18,7 @@ interface PropertyDetailsPageProps {
 export default async function PropertyDetailsPage({
   params,
 }: PropertyDetailsPageProps) {
+  // La obtención de datos se realiza en el servidor
   const property = await propertyService.getPropertyById(params.id);
 
   if (!property) {
@@ -40,6 +28,7 @@ export default async function PropertyDetailsPage({
   return (
     <div className="container mx-auto py-10">
       <div className="grid gap-6">
+        {/* Encabezado y datos generales */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
@@ -50,6 +39,7 @@ export default async function PropertyDetailsPage({
           <Badge variant="outline">{property.status}</Badge>
         </div>
 
+        {/* Tarjetas de Detalles y Ubicación */}
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -140,6 +130,7 @@ export default async function PropertyDetailsPage({
           </Card>
         </div>
 
+        {/* Descripción y Amenidades */}
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -156,15 +147,17 @@ export default async function PropertyDetailsPage({
             </CardHeader>
             <CardContent>
               <ul className="grid grid-cols-2 gap-2">
-                {property.features?.amenities?.map((amenity) => (
-                  <li
-                    key={amenity}
-                    className="flex items-center text-sm text-muted-foreground"
-                  >
-                    <span className="mr-2">•</span>
-                    {amenity}
-                  </li>
-                )) || (
+                {property.features?.amenities?.length ? (
+                  property.features.amenities.map((amenity) => (
+                    <li
+                      key={amenity}
+                      className="flex items-center text-sm text-muted-foreground"
+                    >
+                      <span className="mr-2">•</span>
+                      {amenity}
+                    </li>
+                  ))
+                ) : (
                   <li className="text-sm text-muted-foreground">
                     No amenities listed
                   </li>
@@ -174,6 +167,7 @@ export default async function PropertyDetailsPage({
           </Card>
         </div>
 
+        {/* Imágenes */}
         <Card>
           <CardHeader>
             <CardTitle>Images</CardTitle>
@@ -192,6 +186,7 @@ export default async function PropertyDetailsPage({
           </CardContent>
         </Card>
 
+        {/* Tabs para Documentos y Mantenimiento */}
         <Tabs defaultValue="documents">
           <TabsList>
             <TabsTrigger value="documents">Documents</TabsTrigger>
