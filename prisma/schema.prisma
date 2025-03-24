@@ -54,6 +54,10 @@ model Property {
   maintenanceRecords MaintenanceRecord[]
   user        User     @relation(fields: [ownerId], references: [id])
   ownerId     String
+
+  Tenant Tenant[]
+
+  TenantProperty TenantProperty[]
 }
 
 model Features {
@@ -144,4 +148,42 @@ enum MaintenancePriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+model Tenant {
+  id                   String    @id @default(cuid())
+  firstName            String
+  lastName             String
+  email                String    @unique
+  phone                String
+  currentAddress       String
+  city                 String
+  state                String
+  zipCode              String
+  employmentStatus     String
+  employerName         String?
+  monthlyIncome        Decimal
+  emergencyContactName String
+  emergencyContactPhone String
+  notes                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  TenantProperty TenantProperty[]
+
+  Property Property[]
+}
+
+model TenantProperty {
+  id          String   @id @default(cuid())
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId    String
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+  startDate   DateTime
+  endDate     DateTime?
+  rentAmount  Decimal
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([tenantId, propertyId])
 }
