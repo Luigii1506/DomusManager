@@ -1,121 +1,28 @@
-'use client';
+import { Metadata } from "next";
+import { Header } from "@/components/layout/header";
+import { PropertyList } from "@/components/properties/property-list";
+import { AddPropertyButton } from "@/components/properties/add-property-button";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, MapPin, DollarSign, BedDouble, Bath } from 'lucide-react';
+export const metadata: Metadata = {
+  title: "Properties | DomusManager",
+  description: "Manage your real estate properties",
+};
 
-export default function PropertiesPage() {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [propertyType, setPropertyType] = useState('all');
-
-  // Mock properties data
-  const properties = [
-    {
-      id: 1,
-      title: 'Modern Downtown Apartment',
-      type: 'apartment',
-      location: '123 Main St, Downtown',
-      price: 2500,
-      bedrooms: 2,
-      bathrooms: 2,
-      image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400',
-      status: 'available'
-    },
-    {
-      id: 2,
-      title: 'Luxury Beach House',
-      type: 'house',
-      location: '456 Ocean Ave, Beachfront',
-      price: 5000,
-      bedrooms: 4,
-      bathrooms: 3,
-      image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400',
-      status: 'rented'
-    },
-    // Add more properties as needed
-  ];
-
+export default async function PropertiesPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Properties</h1>
-        <Button>Add New Property</Button>
-      </div>
-
-      <div className="flex gap-4 mb-8">
-        <Input
-          placeholder="Search properties..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <Select value={propertyType} onValueChange={setPropertyType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Property Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="apartment">Apartment</SelectItem>
-            <SelectItem value="house">House</SelectItem>
-            <SelectItem value="commercial">Commercial</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {properties.map((property) => (
-          <Card key={property.id} className="overflow-hidden">
-            <img
-              src={property.image}
-              alt={property.title}
-              className="w-full h-48 object-cover"
-            />
-            <CardHeader>
-              <CardTitle className="flex justify-between items-start">
-                <span>{property.title}</span>
-                <span className={`text-sm px-2 py-1 rounded ${
-                  property.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  {property.location}
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  ${property.price}/month
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-1">
-                    <BedDouble className="h-4 w-4" />
-                    {property.bedrooms} beds
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" />
-                    {property.bathrooms} baths
-                  </div>
-                </div>
-              </div>
-              <Button 
-                className="w-full mt-4"
-                onClick={() => router.push(`/properties/${property.id}`)}
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Properties</h2>
+          <div className="flex items-center space-x-2">
+            <AddPropertyButton />
+          </div>
+        </div>
+        <div className="space-y-4">
+          <PropertyList />
+        </div>
+      </main>
     </div>
   );
 }
